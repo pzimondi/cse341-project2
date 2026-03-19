@@ -1,0 +1,225 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Movie Review API",
+    "description": "A personal API for cataloguing movies and keeping track of reviews",
+    "version": "1.0.0"
+  },
+  "host": "movie-review-api.onrender.com",
+  "basePath": "/",
+  "schemes": ["https"],
+  "tags": [
+    { "name": "Home", "description": "Health check" },
+    { "name": "Movies", "description": "CRUD operations for the movies collection" },
+    { "name": "Reviews", "description": "CRUD operations for the reviews collection" }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["Home"],
+        "summary": "Check if the API is running",
+        "responses": {
+          "200": { "description": "API is alive" }
+        }
+      }
+    },
+    "/movies": {
+      "get": {
+        "tags": ["Movies"],
+        "summary": "Get all movies",
+        "description": "Returns every movie stored in the database",
+        "produces": ["application/json"],
+        "responses": {
+          "200": { "description": "List of movies returned successfully" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "post": {
+        "tags": ["Movies"],
+        "summary": "Add a new movie",
+        "description": "Creates a new movie document in the movies collection",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["title","director","genre","releaseYear","runtime","language","rating","synopsis","studio"],
+              "properties": {
+                "title": { "type": "string", "example": "Inception" },
+                "director": { "type": "string", "example": "Christopher Nolan" },
+                "genre": { "type": "string", "example": "Sci-Fi" },
+                "releaseYear": { "type": "integer", "example": 2010 },
+                "runtime": { "type": "integer", "example": 148 },
+                "language": { "type": "string", "example": "English" },
+                "rating": { "type": "number", "example": 8.8 },
+                "synopsis": { "type": "string", "example": "A thief who steals corporate secrets through dream-sharing technology." },
+                "studio": { "type": "string", "example": "Warner Bros." }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": { "description": "Movie created successfully" },
+          "400": { "description": "Validation failed" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/movies/{id}": {
+      "get": {
+        "tags": ["Movies"],
+        "summary": "Get a single movie by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string", "description": "MongoDB ObjectId" }
+        ],
+        "responses": {
+          "200": { "description": "Movie found" },
+          "400": { "description": "Invalid ID format" },
+          "404": { "description": "Movie not found" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "put": {
+        "tags": ["Movies"],
+        "summary": "Update a movie by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": { "type": "string", "example": "Inception" },
+                "director": { "type": "string", "example": "Christopher Nolan" },
+                "genre": { "type": "string", "example": "Sci-Fi Thriller" },
+                "releaseYear": { "type": "integer", "example": 2010 },
+                "runtime": { "type": "integer", "example": 148 },
+                "language": { "type": "string", "example": "English" },
+                "rating": { "type": "number", "example": 9.0 },
+                "synopsis": { "type": "string", "example": "Updated synopsis." },
+                "studio": { "type": "string", "example": "Warner Bros." }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Updated successfully" },
+          "400": { "description": "Validation failed or invalid ID" },
+          "404": { "description": "Movie not found" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "delete": {
+        "tags": ["Movies"],
+        "summary": "Delete a movie by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "Deleted successfully" },
+          "400": { "description": "Invalid ID format" },
+          "404": { "description": "Movie not found" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/reviews": {
+      "get": {
+        "tags": ["Reviews"],
+        "summary": "Get all reviews",
+        "produces": ["application/json"],
+        "responses": {
+          "200": { "description": "List of reviews" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "post": {
+        "tags": ["Reviews"],
+        "summary": "Submit a new review",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["reviewer","movieTitle","score","comment","watchedOn"],
+              "properties": {
+                "reviewer": { "type": "string", "example": "Pastor Zimondi" },
+                "movieTitle": { "type": "string", "example": "Inception" },
+                "score": { "type": "number", "example": 9.5 },
+                "comment": { "type": "string", "example": "One of the most mind-bending films I have ever watched." },
+                "watchedOn": { "type": "string", "example": "2024-03-10" }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": { "description": "Review submitted" },
+          "400": { "description": "Validation failed" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/reviews/{id}": {
+      "get": {
+        "tags": ["Reviews"],
+        "summary": "Get a single review by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "Review found" },
+          "400": { "description": "Invalid ID" },
+          "404": { "description": "Review not found" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "put": {
+        "tags": ["Reviews"],
+        "summary": "Update a review by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string" },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "reviewer": { "type": "string", "example": "Pastor Zimondi" },
+                "movieTitle": { "type": "string", "example": "Inception" },
+                "score": { "type": "number", "example": 10 },
+                "comment": { "type": "string", "example": "On second watch, even better than I remembered." },
+                "watchedOn": { "type": "string", "example": "2024-06-01" }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Updated" },
+          "400": { "description": "Validation failed or invalid ID" },
+          "404": { "description": "Review not found" },
+          "500": { "description": "Server error" }
+        }
+      },
+      "delete": {
+        "tags": ["Reviews"],
+        "summary": "Delete a review by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "Deleted" },
+          "400": { "description": "Invalid ID" },
+          "404": { "description": "Review not found" },
+          "500": { "description": "Server error" }
+        }
+      }
+    }
+  }
+}
