@@ -5,7 +5,7 @@
     "description": "A personal API for cataloguing movies and keeping track of reviews",
     "version": "1.0.0"
   },
-  "host": "movie-review-api.onrender.com",
+  "host": "cse341-project2-ke3m.onrender.com",
   "basePath": "/",
   "schemes": ["https"],
   "tags": [
