@@ -6,6 +6,7 @@ router.get('/', (req, res) => {
   res.json({ message: 'Movie Review API is up and running!' });
 });
 
+router.use('/auth', require('./auth'));
 router.use('/movies', require('./movies'));
 router.use('/reviews', require('./reviews'));
 

@@ -2,14 +2,25 @@
   "swagger": "2.0",
   "info": {
     "title": "Movie Review API",
-    "description": "A personal API for cataloguing movies and keeping track of reviews",
+    "description": "A personal API for cataloguing movies and keeping track of reviews. Protected routes require GitHub OAuth authentication — visit /auth/github to log in first.",
     "version": "1.0.0"
   },
   "host": "cse341-project2-ke3m.onrender.com",
   "basePath": "/",
   "schemes": ["https"],
+  "securityDefinitions": {
+    "githubOAuth": {
+      "type": "oauth2",
+      "authorizationUrl": "https://cse341-project2-ke3m.onrender.com/auth/github",
+      "flow": "implicit",
+      "scopes": {
+        "user:email": "Read your GitHub email address"
+      }
+    }
+  },
   "tags": [
     { "name": "Home", "description": "Health check" },
+    { "name": "Auth", "description": "GitHub OAuth login and logout" },
     { "name": "Movies", "description": "CRUD operations for the movies collection" },
     { "name": "Reviews", "description": "CRUD operations for the reviews collection" }
   ],
@@ -23,11 +34,42 @@
         }
       }
     },
+    "/auth/github": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Log in with GitHub",
+        "description": "Redirects the user to GitHub to authenticate. After approving, GitHub redirects back to /auth/github/callback.",
+        "responses": {
+          "302": { "description": "Redirects to GitHub OAuth page" }
+        }
+      }
+    },
+    "/auth/github/callback": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "GitHub OAuth callback",
+        "description": "GitHub redirects here after authentication. Establishes a session and returns user info.",
+        "responses": {
+          "200": { "description": "Login successful, session created" },
+          "401": { "description": "Authentication failed" }
+        }
+      }
+    },
+    "/auth/logout": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Log out",
+        "description": "Destroys the current session and logs the user out.",
+        "responses": {
+          "200": { "description": "Logged out successfully" }
+        }
+      }
+    },
     "/movies": {
       "get": {
         "tags": ["Movies"],
         "summary": "Get all movies",
-        "description": "Returns every movie stored in the database",
+        "description": "Returns every movie stored in the database. Public — no login required.",
         "produces": ["application/json"],
         "responses": {
           "200": { "description": "List of movies returned successfully" },
@@ -37,7 +79,8 @@
       "post": {
         "tags": ["Movies"],
         "summary": "Add a new movie",
-        "description": "Creates a new movie document in the movies collection",
+        "description": "Creates a new movie document. Requires GitHub OAuth login.",
+        "security": [{ "githubOAuth": ["user:email"] }],
         "parameters": [
           {
             "name": "body",
@@ -63,6 +106,7 @@
         "responses": {
           "201": { "description": "Movie created successfully" },
           "400": { "description": "Validation failed" },
+          "401": { "description": "Unauthorized — login required" },
           "500": { "description": "Server error" }
         }
       }
@@ -71,6 +115,7 @@
       "get": {
         "tags": ["Movies"],
         "summary": "Get a single movie by ID",
+        "description": "Public — no login required.",
         "parameters": [
           { "name": "id", "in": "path", "required": true, "type": "string", "description": "MongoDB ObjectId" }
         ],
@@ -84,6 +129,8 @@
       "put": {
         "tags": ["Movies"],
         "summary": "Update a movie by ID",
+        "description": "Requires GitHub OAuth login.",
+        "security": [{ "githubOAuth": ["user:email"] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "type": "string" },
           {
@@ -109,6 +156,7 @@
         "responses": {
           "204": { "description": "Updated successfully" },
           "400": { "description": "Validation failed or invalid ID" },
+          "401": { "description": "Unauthorized — login required" },
           "404": { "description": "Movie not found" },
           "500": { "description": "Server error" }
         }
@@ -116,12 +164,15 @@
       "delete": {
         "tags": ["Movies"],
         "summary": "Delete a movie by ID",
+        "description": "Requires GitHub OAuth login.",
+        "security": [{ "githubOAuth": ["user:email"] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "type": "string" }
         ],
         "responses": {
           "200": { "description": "Deleted successfully" },
           "400": { "description": "Invalid ID format" },
+          "401": { "description": "Unauthorized — login required" },
           "404": { "description": "Movie not found" },
           "500": { "description": "Server error" }
         }
@@ -131,6 +182,7 @@
       "get": {
         "tags": ["Reviews"],
         "summary": "Get all reviews",
+        "description": "Public — no login required.",
         "produces": ["application/json"],
         "responses": {
           "200": { "description": "List of reviews" },
@@ -140,6 +192,8 @@
       "post": {
         "tags": ["Reviews"],
         "summary": "Submit a new review",
+        "description": "Requires GitHub OAuth login.",
+        "security": [{ "githubOAuth": ["user:email"] }],
         "parameters": [
           {
             "name": "body",
@@ -161,6 +215,7 @@
         "responses": {
           "201": { "description": "Review submitted" },
           "400": { "description": "Validation failed" },
+          "401": { "description": "Unauthorized — login required" },
           "500": { "description": "Server error" }
         }
       }
@@ -169,6 +224,7 @@
       "get": {
         "tags": ["Reviews"],
         "summary": "Get a single review by ID",
+        "description": "Public — no login required.",
         "parameters": [
           { "name": "id", "in": "path", "required": true, "type": "string" }
         ],
@@ -182,6 +238,8 @@
       "put": {
         "tags": ["Reviews"],
         "summary": "Update a review by ID",
+        "description": "Requires GitHub OAuth login.",
+        "security": [{ "githubOAuth": ["user:email"] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "type": "string" },
           {
@@ -203,6 +261,7 @@
         "responses": {
           "204": { "description": "Updated" },
           "400": { "description": "Validation failed or invalid ID" },
+          "401": { "description": "Unauthorized — login required" },
           "404": { "description": "Review not found" },
           "500": { "description": "Server error" }
         }
@@ -210,12 +269,15 @@
       "delete": {
         "tags": ["Reviews"],
         "summary": "Delete a review by ID",
+        "description": "Requires GitHub OAuth login.",
+        "security": [{ "githubOAuth": ["user:email"] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "type": "string" }
         ],
         "responses": {
           "200": { "description": "Deleted" },
           "400": { "description": "Invalid ID" },
+          "401": { "description": "Unauthorized — login required" },
           "404": { "description": "Review not found" },
           "500": { "description": "Server error" }
         }
